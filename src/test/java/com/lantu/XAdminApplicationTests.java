@@ -19,6 +19,7 @@ class XAdminApplicationTests {
         List<User> user = userMapper.selectList(null);
         user.forEach(System.out::println);
         System.out.println("aaa");
+        System.out.println("aaa3");
     }
 
 }
