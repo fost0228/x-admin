@@ -43,4 +43,20 @@ public class UserController {
     }
 
 
+    @GetMapping("/info")
+    public Result<Map<String, Object>> getUserInfo(@RequestParam("token") String token){
+        //get user info from redis by token
+        Map<String, Object> data = userService.getUserInfo(token);
+        if(data != null){
+            return Result.success(data);
+        }
+        return Result.fail(20003, "login info is invalid");
+    }
+
+
+    @PostMapping("/logout")
+    public Result<?> logout(@RequestHeader("X-Token") String token){
+        userService.logOut(token);
+        return Result.success();
+    }
 }
