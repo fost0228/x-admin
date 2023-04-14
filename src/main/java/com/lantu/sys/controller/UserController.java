@@ -4,12 +4,11 @@ import com.lantu.common.vo.Result;
 import com.lantu.sys.entity.User;
 import com.lantu.sys.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -31,5 +30,17 @@ public class UserController {
         List<User> list = userService.list();
         return new Result<>(20000, "success", list);
     }
+
+
+    @PostMapping("/login")
+    public Result<Map<String, Object>> login(@RequestBody User user){
+        Map<String, Object> data = userService.login(user);
+        if(data != null){
+            return Result.success(data);
+        }
+
+        return Result.fail(20002,"username or password is wrong");
+    }
+
 
 }
