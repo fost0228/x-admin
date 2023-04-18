@@ -72,6 +72,7 @@ public class UserController {
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(StringUtils.hasLength(username), User::getUsername, username);
         wrapper.eq(StringUtils.hasLength(phone), User::getPhone, phone);
+        wrapper.orderByDesc(User::getId);
 
         Page<User> page = new Page<>(pageNo, pageSize);
         userService.page(page, wrapper);
@@ -82,5 +83,11 @@ public class UserController {
 
         return Result.success(data);
 
+    }
+    
+    @PostMapping
+    public Result<?> addUser(@RequestBody User user){
+        userService.save(user);
+        return Result.success("Add user successfully!");
     }
 }
