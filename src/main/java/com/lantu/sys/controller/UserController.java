@@ -93,6 +93,25 @@ public class UserController {
     public Result<?> addUser(@RequestBody User user){
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userService.save(user);
-        return Result.success("Add user successfully!");
+        return Result.success("Add user success!");
+    }
+
+    @PutMapping
+    public Result<?> updataUser(@RequestBody User user){
+        user.setPassword(null);
+        userService.updateById(user);
+        return Result.success("Update success!");
+    }
+
+    @GetMapping("/{id}")
+    public Result<User> getUserById(@PathVariable("id") Integer id){
+        User user = userService.getById(id);
+        return Result.success(user);
+    }
+
+    @DeleteMapping("/{id}")
+    public Result<User> deleteUserById(@PathVariable("id") Integer id){
+        userService.removeById(id);
+        return Result.success("Delete success!");
     }
 }
