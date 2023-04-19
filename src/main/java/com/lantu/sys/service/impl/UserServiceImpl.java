@@ -8,6 +8,7 @@ import com.lantu.sys.service.IUserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -31,20 +32,24 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Autowired
     private RedisTemplate redisTemplate;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Override
     public Map<String, Object> login(User user) {
         //search by username and password
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(User::getUsername, user.getUsername());
-        wrapper.eq(User::getPassword,user.getPassword());
         User loginUser = this.baseMapper.selectOne(wrapper);
-        //if result is not null, then generate a token and save user info into redis
-        if(loginUser != null){
+        //if result is not null, and the password matches, then generate a token and save user info into redis
+        if(loginUser != null && passwordEncoder.matches(user.getPassword(), loginUser.getPassword())){
             //uuid
             String key = "user:" + UUID.randomUUID();
+
             //save in redis
             loginUser.setPassword(null);
             redisTemplate.opsForValue().set(key, loginUser, 30, TimeUnit.MINUTES);
+
             //return value
             Map<String, Object> data = new HashMap<>();
             data.put("token", key);
@@ -52,6 +57,28 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         }
         return null;
     }
+
+//    @Override
+//    public Map<String, Object> login(User user) {
+//        //search by username and password
+//        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+//        wrapper.eq(User::getUsername, user.getUsername());
+//        wrapper.eq(User::getPassword,user.getPassword());
+//        User loginUser = this.baseMapper.selectOne(wrapper);
+//        //if result is not null, then generate a token and save user info into redis
+//        if(loginUser != null){
+//            //uuid
+//            String key = "user:" + UUID.randomUUID();
+//            //save in redis
+//            loginUser.setPassword(null);
+//            redisTemplate.opsForValue().set(key, loginUser, 30, TimeUnit.MINUTES);
+//            //return value
+//            Map<String, Object> data = new HashMap<>();
+//            data.put("token", key);
+//            return data;
+//        }
+//        return null;
+//    }
 
     @Override
     public Map<String, Object> getUserInfo(String token) {
