@@ -2,6 +2,7 @@ package com.lantu.sys.service.impl;
 
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.lantu.common.utils.JwtUtil;
 import com.lantu.sys.entity.User;
 import com.lantu.sys.mapper.UserMapper;
 import com.lantu.sys.service.IUserService;
@@ -31,6 +32,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Autowired
     private RedisTemplate redisTemplate;
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -44,15 +47,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         //if result is not null, and the password matches, then generate a token and save user info into redis
         if(loginUser != null && passwordEncoder.matches(user.getPassword(), loginUser.getPassword())){
             //uuid
-            String key = "user:" + UUID.randomUUID();
+//            String key = "user:" + UUID.randomUUID();
 
             //save in redis
             loginUser.setPassword(null);
-            redisTemplate.opsForValue().set(key, loginUser, 30, TimeUnit.MINUTES);
+            String token = jwtUtil.createToken(loginUser);
+//            redisTemplate.opsForValue().set(token, loginUser, 30, TimeUnit.MINUTES);
 
             //return value
             Map<String, Object> data = new HashMap<>();
-            data.put("token", key);
+            data.put("token", token);
             return data;
         }
         return null;
